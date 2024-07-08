@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100-Day Journal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>100-Day Journal</h1>
+        <div class="grid">
+            <!-- JavaScript will dynamically generate the day boxes -->
+        </div>
+    </div>
+
+    <div class="modal" id="textModal">
+        <div class="modal-content-wrapper">
+            <span class="close" id="closeModal">&times;</span>
+            <textarea class="modal-content" id="modalText"></textarea>
+            <button id="saveText">Save</button>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <ul>
+            <li id="editText">Edit Text</li>
+            <li id="deleteText">Delete Text</li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const grid = document.querySelector(".grid");
+            const contextMenu = document.getElementById("contextMenu");
+            let currentBox = null;
+
+            // Load saved texts from local storage on page load
+            for (let day = 1; day <= 100; day++) {
+                const textContent = localStorage.getItem(`text-${day}`);
+                createDayBox(day, textContent);
+            }
+
+            function createDayBox(day, textContent) {
+                const item = document.createElement("div");
+                item.classList.add("item");
+
+                const label = document.createElement("p");
+                label.textContent = `Day - ${day}`;
+                item.appendChild(label);
+
+                const box = document.createElement("div");
+                box.classList.add("box");
+
+                if (textContent) {
+                    box.textContent = textContent;
+                    box.dataset.textContent = textContent;
+                } else {
+                    box.textContent = "Click to add text";
+                }
+
+                item.appendChild(box);
+                grid.appendChild(item);
+
+                box.addEventListener("contextmenu", function(event) {
+                    event.preventDefault();
+                    if (box.dataset.textContent) {
+                        currentBox = box;
+                        contextMenu.style.display = "block";
+                        contextMenu.style.left = `${event.pageX}px`;
+                        contextMenu.style.top = `${event.pageY}px`;
+                    }
+                });
+
+                box.addEventListener("click", function() {
+                    const modal = document.getElementById("textModal");
+                    const modalText = document.getElementById("modalText");
+                    modal.style.display = "flex";
+                    modalText.value = box.dataset.textContent || "";
+                    currentBox = box;
+                });
+            }
+
+            document.addEventListener("click", function(event) {
+                if (!contextMenu.contains(event.target)) {
+                    contextMenu.style.display = "none";
+                }
+            });
+
+            document.getElementById("editText").onclick = function() {
+                if (currentBox) {
+                    const modal = document.getElementById("textModal");
+                    const modalText = document.getElementById("modalText");
+                    modal.style.display = "flex";
+                    modalText.value = currentBox.dataset.textContent || "";
+                    contextMenu.style.display = "none";
+                }
+            };
+
+            document.getElementById("deleteText").onclick = function() {
+                if (currentBox) {
+                    currentBox.textContent = "Click to add text";
+                    delete currentBox.dataset.textContent;
+                    localStorage.removeItem(`text-${currentBox.previousSibling.textContent.split(' ')[2]}`);
+                    contextMenu.style.display = "none";
+                }
+            };
+
+            const modal = document.getElementById("textModal");
+            const closeModal = document.getElementById("closeModal");
+            closeModal.onclick = function() {
+                modal.style.display = "none";
+            };
+
+            document.getElementById("saveText").onclick = function() {
+                if (currentBox) {
+                    const modalText = document.getElementById("modalText").value;
+                    currentBox.textContent = modalText;
+                    currentBox.dataset.textContent = modalText;
+                    localStorage.setItem(`text-${currentBox.previousSibling.textContent.split(' ')[2]}`, modalText);
+                    modal.style.display = "none";
+                }
+            };
+
+            document.addEventListener("keydown", function(event) {
+                if (event.key === "Escape") {
+                    const modal = document.getElementById("textModal");
+                    modal.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

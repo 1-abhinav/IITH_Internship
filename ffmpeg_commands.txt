@@ -1,0 +1,9 @@
+ffmpeg commands
+
+ffmpeg -i "Driver2_grayscale.mp4" -ss 00:01:30 -to 00:01:50 -c copy "trim.mp4"
+
+ffmpeg -i input.wmv -vf format=gray -c:v wmv2 -b:v 5000k output.wmv
+
+ffmpeg -f lavfi -i color=c=gray:s=1088x1080:r=30:d=300 -t 300 -vf "format=yuv420p" -c:v wmv2 -b:v 2498k -c:a wmav2 -b:a 64k -ar 48000 output.wmv
+
+ffmpeg -i sc_r001000__s001000.wmv -ss 00:00:01.500 -frames:v 1 output.jpg
